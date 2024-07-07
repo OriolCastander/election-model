@@ -1,0 +1,28 @@
+.App {
+  width: 100%;
+}
+
+
+.Main{
+  max-width: 1000px;
+  margin-inline: auto;
+}
+
+
+.bar-marker{ /** The "title" at the side of a bar */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 50px;
+}
+
+
+.bar{
+  width: 100%;
+}
+
+
+.map-wrapper{
+  background-color: gray;
+  width: 100%;
+}
