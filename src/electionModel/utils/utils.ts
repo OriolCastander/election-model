@@ -58,7 +58,6 @@ export const getElectoralCollegeCounts = (states: {[kind in PresidentialContestN
 
     for (const stateName in states){
         const color = getDistributionColor(states[stateName as PresidentialContestName], thresholds);
-        console.log(stateName + "  " + jsonData[stateName as PresidentialContestName].electors.length);
         count[color]! += jsonData[stateName as PresidentialContestName].electors.length;
     }
 

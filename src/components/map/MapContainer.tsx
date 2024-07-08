@@ -14,7 +14,7 @@ function MapContainer({prezData}: {prezData: PresidentialRaceOutput}){
     const mapContainerRef = React.useRef<HTMLDivElement>(null);
     const [highlightedState, setHighlightedState] = React.useState<PresidentialContestName | null>(null);
     
-    const mapColors = mapObject<PresidentialContestName, Distribution, string>(prezData.states, (distribution)=>LITERAL_COLORS[getDistributionColor(distribution)]);
+    const mapColors = mapObject<PresidentialContestName, Distribution, string>(prezData.contests, (distribution)=>LITERAL_COLORS[getDistributionColor(distribution)]);
     const [mapElectors, setMapElectors] = React.useState<MapElectorsData>(getMapElectorsData(mapColors)) as [MapElectorsData, (callback: (value: MapElectorsData) => MapElectorsData) => void];
 
     

@@ -7,9 +7,9 @@ import { getElectoralCollegeCounts, getRawVoteData } from "../electionModel/util
 
 function MainPage(){
 
-    const prezData = PRESIDENTIAL_RACE.mockCompute();
+    const prezData = PRESIDENTIAL_RACE.compute({contestElasticity: 0.0});
 
-    const electoralCollegeData = getElectoralCollegeCounts(prezData.states);
+    const electoralCollegeData = getElectoralCollegeCounts(prezData.contests);
     const popularVoteData = getRawVoteData(PRESIDENTIAL_RACE.genericBallot.mockComputeSeparate());
 
     return (

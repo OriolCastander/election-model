@@ -31,7 +31,9 @@ export class NormalDistribution extends Distribution{
         return new NormalDistribution(mean, Math.sqrt(diffsSquaredSubtotal / array.length));
     }
 
-
+    /**
+     * Returns the probability that a random sample is above the cuttoff
+     */
     getProbability(cutoff: number = 0.0): number {
         
         var x = (cutoff - this.mean) / (this.std * Math.sqrt(2));
@@ -56,6 +58,19 @@ export class NormalDistribution extends Distribution{
         var res = .5 * (1 + erf);
     
         return res; 
+    }
+
+    /**
+     * Returns a normal distribution that is this shifted by the other. If weighted, 0th element is the weight for this,
+     * 1st is weight for the other
+     */
+    getShifted(otherNormal: NormalDistribution, weights: [number,number] | null = null): NormalDistribution{
+
+        if (weights == null){weights = [1.,1.];}
+
+        const newMean = this.mean * weights[0] + otherNormal.mean * weights[0];
+        const newStd = Math.sqrt(Math.pow(this.std * weights[0], 2) + Math.pow(otherNormal.std * weights[1], 2));
+        return new NormalDistribution(newMean, newStd);
     }
 
     

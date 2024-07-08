@@ -1,3 +1,4 @@
+import { NormalDistribution } from "./normalDistribution";
 
 /**
  * The abstract probability distribution
