@@ -32,7 +32,7 @@ export class NormalDistribution extends Distribution{
     }
 
     /**
-     * Returns the probability that a random sample is above the cuttoff
+     * Returns the probability that a random sample is below the cuttoff
      */
     getProbability(cutoff: number = 0.0): number {
         
