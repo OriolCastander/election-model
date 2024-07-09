@@ -9,9 +9,9 @@ export class DiscreteDistribution extends Distribution{
     /**
      * The number of discrete points, also the length of the cdf array
      */
-    private nPoints: number;
+    public nPoints: number;
 
-    private scaler: {
+    public scaler: {
         /** The corresponding (x) value for the 0th element of the cdf array */
         start: number,
 
@@ -25,7 +25,7 @@ export class DiscreteDistribution extends Distribution{
     /**
      * The cumulative probability at those indexes (first is guaranteed 0, last is guaranteed 1)
      */
-    private cdf: number[];
+    public cdf: number[];
 
 
     constructor(cdf: number[], start: number, end: number){
@@ -115,5 +115,14 @@ export class DiscreteDistribution extends Distribution{
         const percentageFromBelow = (probability - this.cdf[indexBelow]) / (this.cdf[indexAbove] - this.cdf[indexBelow]);
 
         return this.scaler.start + this.scaler.dx * (indexBelow + percentageFromBelow);
+    }
+
+    getPdf(): number[]{
+
+        return this.cdf.map((val, index)=>{
+
+            if (index == 0){return 0;}
+            else{return val - this.cdf[index - 1];}
+        });
     }
 }

@@ -83,9 +83,9 @@ export interface PresidentialRaceSimulationOutput{
     contests: {[kind in PresidentialContestName]: DiscreteDistribution},
 
     /**
-     * Distribution of the number of electors that the democrats get
+     * "Map" of number of electors that the democrats get
      */
-    electoralVotes: DiscreteDistribution,
+    electoralVotes: {[num: number]: number},
 
     /**
      * The contest that gave each victor the contest (meaning they could've afforeded to lose all less leaning towards them states)
@@ -161,7 +161,7 @@ export class PresidentialRace{
         contestElasticity: .3,
         genericBallotContestConfig: Contest.defaultContestComputeConfig,
         constestConfig: Contest.defaultContestComputeConfig,
-        noPollingUncertainty: .01,
+        noPollingUncertainty: .015,
     }
 
     /**
@@ -301,6 +301,13 @@ export class PresidentialRace{
         }
 
 
+        const electorsObject: {[num: number]: number} = {};
+        for (const value of electors){
+            if (!(value in electorsObject)){electorsObject[value] = 0.0;}
+            electorsObject[value] += 1 / config.nIterations;
+        }
+
+
         const contestDists: {[s in PresidentialContestName]?: DiscreteDistribution} = {};
         for (const contestName in contestResults){
             contestDists[contestName as PresidentialContestName] = DiscreteDistribution.fromArray(contestResults[contestName as PresidentialContestName]!, config.nDiscretePoints);
@@ -310,7 +317,7 @@ export class PresidentialRace{
             results: results,
             genericBallot: DiscreteDistribution.fromArray(genericBallotResults, config.nDiscretePoints),
             contests: contestDists as {[s in PresidentialContestName]: DiscreteDistribution},
-            electoralVotes: DiscreteDistribution.fromArray(electors, config.nDiscretePoints),
+            electoralVotes: electorsObject,
             tipoffContests: tipoffs,
         };
 

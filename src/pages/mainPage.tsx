@@ -1,5 +1,6 @@
 
 import Bar from "../components/Bar";
+import SimulationGraph from "../components/SimulationGraph";
 import MapContainer from "../components/map/MapContainer";
 
 import { PRESIDENTIAL_RACE } from "../electionModel";
@@ -14,7 +15,8 @@ function MainPage(){
     const popularVoteData = getRawVoteData(PRESIDENTIAL_RACE.genericBallot.computeSeparate()!);
 
     const simulations = PRESIDENTIAL_RACE.simulate(PresidentialRace.defaultSimulationConfig, prezData);
-    console.log(simulations);
+
+    const electoralCollegeSimData = {xs: Object.keys(simulations.electoralVotes).map((v)=>parseInt(v)), ys: Object.values(simulations.electoralVotes)};
 
     return (
         <div>
@@ -77,7 +79,8 @@ function MainPage(){
 
             {/** Simulation */}
             <div>
-                SIMULATION
+                
+                <SimulationGraph data={electoralCollegeSimData} />
             </div>
         </div>
     )
