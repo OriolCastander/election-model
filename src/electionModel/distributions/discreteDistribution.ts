@@ -39,6 +39,35 @@ export class DiscreteDistribution extends Distribution{
 
         this.mean = this.getValue(.5);
     }
+    
+    /**
+     * Constructs a discrete distribution from an array
+     */
+    static fromArray(array: number[], nPoints: number): DiscreteDistribution{
+
+        array.sort((a,b)=>a-b);
+
+        const cdf: number[] = [0.0];
+
+        const dx = (array.at(-1)! - array[0]) / nPoints;
+        var currentXPos = array[0] + dx;
+
+        var arrayIndex = 0;
+
+        for (var i=1; i<nPoints; i++){
+
+            while (true){
+                if (array[arrayIndex] < currentXPos){arrayIndex += 1;}
+                else{break;}
+                
+            }
+            cdf.push(arrayIndex / array.length);
+            currentXPos += dx;
+        }
+
+        return new DiscreteDistribution(cdf, array[0], array.at(-1)!);
+    }
+
 
     /**
      * Returns the probability that the value is below a certain cutoff
@@ -56,6 +85,14 @@ export class DiscreteDistribution extends Distribution{
         return this.cdf[indexBelow] * percentageBelow + this.cdf[indexBelow + 1] * (1 - percentageBelow);
         
     }
+
+    /**
+     * Returns a random value
+     */
+        getRandom(): number {
+        
+            return this.getValue(Math.random());
+        }
 
     /**
      * Returns the (x-axis) value that would have that probability

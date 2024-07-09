@@ -3,14 +3,18 @@ import Bar from "../components/Bar";
 import MapContainer from "../components/map/MapContainer";
 
 import { PRESIDENTIAL_RACE } from "../electionModel";
+import { PresidentialRace } from "../electionModel/contests/presidentialRace";
 import { getElectoralCollegeCounts, getRawVoteData } from "../electionModel/utils/utils";
 
 function MainPage(){
 
-    const prezData = PRESIDENTIAL_RACE.compute({contestElasticity: 0.0});
+    const prezData = PRESIDENTIAL_RACE.compute();
 
-    const electoralCollegeData = getElectoralCollegeCounts(prezData.contests);
+    const electoralCollegeData = getElectoralCollegeCounts(prezData.contestsWhole);
     const popularVoteData = getRawVoteData(PRESIDENTIAL_RACE.genericBallot.computeSeparate()!);
+
+    const simulations = PRESIDENTIAL_RACE.simulate(PresidentialRace.defaultSimulationConfig, prezData);
+    console.log(simulations);
 
     return (
         <div>

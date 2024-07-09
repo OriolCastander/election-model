@@ -12,4 +12,6 @@ export abstract class Distribution{
     }
 
     abstract getProbability(cutoff: number) : number;
+
+    abstract getRandom(): number;
 }

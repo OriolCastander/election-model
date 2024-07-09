@@ -61,6 +61,18 @@ export class NormalDistribution extends Distribution{
     }
 
     /**
+     * Returns a normally distributed value
+     */
+    getRandom(): number {
+        
+        const u = (1 - Math.random()); //ENSURE THAT THERE'S NO 0
+        const v = Math.random();
+
+        const mag = this.std * Math.sqrt( - 2.0 * Math.log(u));
+        return mag * Math.cos(2 * Math.PI * v) + this.mean;
+    }
+
+    /**
      * Returns a normal distribution that is this shifted by the other. If weighted, 0th element is the weight for this,
      * 1st is weight for the other
      */

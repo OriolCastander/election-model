@@ -20,7 +20,7 @@ function Bar({title, data}: {title: string, data: BarData}){
             </div>
 
             <div style={{display: "flex"}}>
-                <div className="bar-marker" style={{minWidth: "50px"}}>{demTotal < 1 ? (demTotal * 100)+"%" : demTotal}</div>
+                <div className="bar-marker" style={{minWidth: "50px"}}>{demTotal < 1 ? (demTotal * 100).toFixed(2)+"%" : demTotal}</div>
 
                 <div style={{display: "flex", width: "100%"}}>
                     {Object.keys(data).map((key)=>{
@@ -30,7 +30,7 @@ function Bar({title, data}: {title: string, data: BarData}){
                     })}
                 </div>
                 
-                <div className="bar-marker" style={{minWidth: "50px", textAlign: "right"}}>{repTotal < 1 ? (repTotal * 100)+"%" : repTotal}</div>
+                <div className="bar-marker" style={{minWidth: "50px", textAlign: "right"}}>{repTotal < 1 ? (repTotal * 100).toFixed(2)+"%" : repTotal}</div>
             </div>
         </div>
     );
