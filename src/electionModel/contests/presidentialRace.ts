@@ -7,6 +7,7 @@ import {Contest} from "../contests/contest";
 import { stateNames, StateName } from "../utils/utils";
 
 import jsonData from "../../data/data.json";
+import { Poll } from "../polling/poll";
 
 
 export const presidentialContestNames = [... stateNames, "Maine 1st" , "Maine 2nd" , "Nebraska 1st" , "Nebraska 2nd" , "Nebraska 3rd" ,
@@ -17,7 +18,7 @@ export type PresidentialContestName = typeof presidentialContestNames[number];
 /**
  * Configs for the computation of a presidential race
  */
-export type PresidentialRaceConfig = {
+export interface PresidentialRaceConfig{
 
     /**
      * Factor by which the contest is independent from the generic ballot. A 1 it is completely separate, a 0 it is completely tied
@@ -90,7 +91,7 @@ export class PresidentialRace{
      */
     compute(config: PresidentialRaceConfig): PresidentialRaceOutput{
 
-        const genericBallotDist = this.genericBallot.mockCompute() as NormalDistribution;
+        const genericBallotDist = this.genericBallot.compute()! as NormalDistribution;
 
         const contests: {[kind in PresidentialContestName]?: Distribution} = {};
         
@@ -100,34 +101,32 @@ export class PresidentialRace{
 
             //COMPUTE THE DISTRIBUTION ONLY WITH THE GENERIC BALLOT SHIFTED BY THE CONTEST UNIQUENESS
             const genericBallotEnvironment = genericBallotDist.getShifted(contest.uniqueness as NormalDistribution);
-            const combinedDist = genericBallotEnvironment.getShifted(contest.mockCompute() as NormalDistribution, [1 - config.contestElasticity, config.contestElasticity]);
+            const contestDist = contest.compute();
+
+            let combinedDist = genericBallotEnvironment;
+            if (contestDist != null){
+                combinedDist = genericBallotEnvironment.getShifted(contestDist as NormalDistribution, [1 - config.contestElasticity, config.contestElasticity]);
+            }
+
             contests[contestName as PresidentialContestName] = combinedDist;
         }
 
         return {
-            genericBallot: this.genericBallot.mockComputeSeparate(),
+            genericBallot: this.genericBallot.computeSeparate()!,
             contests: contests as {[kind in PresidentialContestName]: Distribution}
         }
-
-
     }
 
-    mockCompute(): PresidentialRaceOutput{
+    /**
+     * Adds polls to the presidential race
+     */
+    addPolls(polls: Poll[]): void{
+        this.genericBallot.polls.push(...polls.filter((poll)=>poll.contest === ""));
 
-        console.log("mock computing");
-        
-        const states: {[kind in PresidentialContestName]?: Distribution} = {};
-
-        for (const presidentialConstestName of presidentialContestNames){
-            const mockDist = new NormalDistribution((Math.random() - .5) * .5, Math.random() * .03 + .01);
-            states[presidentialConstestName] = mockDist;
+        for (const contestName in this.contests){
+            this.contests[contestName as PresidentialContestName].polls.push(...polls.filter((poll)=>poll.contest === contestName));
         }
 
-        return {
-            genericBallot: this.genericBallot.mockComputeSeparate(),
-
-            contests: states as {[kind in PresidentialContestName]: Distribution},
-        }
     }
 }
 

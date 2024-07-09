@@ -10,7 +10,7 @@ function MainPage(){
     const prezData = PRESIDENTIAL_RACE.compute({contestElasticity: 0.0});
 
     const electoralCollegeData = getElectoralCollegeCounts(prezData.contests);
-    const popularVoteData = getRawVoteData(PRESIDENTIAL_RACE.genericBallot.mockComputeSeparate());
+    const popularVoteData = getRawVoteData(PRESIDENTIAL_RACE.genericBallot.computeSeparate()!);
 
     return (
         <div>
