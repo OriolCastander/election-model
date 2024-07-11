@@ -1,6 +1,9 @@
+/**
+ * STUFF RELATED WITH POPULATING A MAP WITH THE ELECTOR SQUARES
+ */
+
 import dataJSON from "../../data/data.json";
 import { PresidentialContestName } from "../../electionModel/contests/presidentialRace";
-import { LITERAL_COLORS } from "../../utils/utils";
 
 
 export interface MapElectorData{
@@ -41,7 +44,7 @@ export type MapElectorsData = {
 export const getMapElectorsData = (colors: {[stateName in PresidentialContestName]: string}): MapElectorsData=>{
 
     const electorsData: MapElectorData[] = [];
-    var minX = 0; var maxX = 0; var minY = 0; var maxY = 0;
+    var minX = Infinity; var maxX = -Infinity; var minY = Infinity; var maxY = -Infinity;
 
     for (const stateName in dataJSON){
         const stateData = dataJSON[stateName as PresidentialContestName];
