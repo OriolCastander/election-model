@@ -1,11 +1,12 @@
 
 import Bar from "../components/Bar";
-import SimulationGraph from "../components/SimulationGraph";
 import MapContainer from "../components/map/MapContainer";
 
 import { PRESIDENTIAL_RACE } from "../electionModel";
 import { PresidentialRace } from "../electionModel/contests/presidentialRace";
 import { getElectoralCollegeCounts, getRawVoteData } from "../electionModel/utils/utils";
+import AreaChart from "../components/AreaChart";
+import { getRollingAverage } from "../utils/utils";
 
 function MainPage(){
 
@@ -16,7 +17,7 @@ function MainPage(){
 
     const simulations = PRESIDENTIAL_RACE.simulate(PresidentialRace.defaultSimulationConfig, prezData);
 
-    const electoralCollegeSimData = {xs: Object.keys(simulations.electoralVotes).map((v)=>parseInt(v)), ys: Object.values(simulations.electoralVotes)};
+    const electoralCollegeSimData = Object.keys(simulations.electoralVotes).map(key=>{return {x:parseInt(key), y:simulations.electoralVotes[parseInt(key)]}});
 
     return (
         <div>
@@ -80,8 +81,13 @@ function MainPage(){
             {/** Simulation */}
             <div>
                 
-                <SimulationGraph data={electoralCollegeSimData} />
+                <AreaChart data={getRollingAverage(electoralCollegeSimData, 10)} color={"#ff0000"}/>
             </div>
+
+
+            <div style={{height: "50px"}}></div>
+
+            {/**  */}
         </div>
     )
 }

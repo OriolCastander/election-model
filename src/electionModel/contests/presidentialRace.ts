@@ -85,7 +85,7 @@ export interface PresidentialRaceSimulationOutput{
     /**
      * "Map" of number of electors that the democrats get
      */
-    electoralVotes: {[num: number]: number},
+    electoralVotes: number[],
 
     /**
      * The contest that gave each victor the contest (meaning they could've afforeded to lose all less leaning towards them states)
@@ -224,7 +224,7 @@ export class PresidentialRace{
         const contestResults: {[name in PresidentialContestName]?: number[]} = {};
         for (const contestName in this.contests){contestResults[contestName as PresidentialContestName] = [];}
         
-        const electors: number[] = [];
+        const electors: number[] = new Array(539).fill(0);
         
 
         for (let i=0; i<config.nIterations; i++){
@@ -262,7 +262,7 @@ export class PresidentialRace{
                 }
             }
 
-            electors.push(nElectors);
+            electors[nElectors] += 1 / config.nIterations;
 
             //ASSIGN A VICTOR (+ TIPOFF STATES)
             if (nElectors > 269){
@@ -301,13 +301,6 @@ export class PresidentialRace{
         }
 
 
-        const electorsObject: {[num: number]: number} = {};
-        for (const value of electors){
-            if (!(value in electorsObject)){electorsObject[value] = 0.0;}
-            electorsObject[value] += 1 / config.nIterations;
-        }
-
-
         const contestDists: {[s in PresidentialContestName]?: DiscreteDistribution} = {};
         for (const contestName in contestResults){
             contestDists[contestName as PresidentialContestName] = DiscreteDistribution.fromArray(contestResults[contestName as PresidentialContestName]!, config.nDiscretePoints);
@@ -317,7 +310,7 @@ export class PresidentialRace{
             results: results,
             genericBallot: DiscreteDistribution.fromArray(genericBallotResults, config.nDiscretePoints),
             contests: contestDists as {[s in PresidentialContestName]: DiscreteDistribution},
-            electoralVotes: electorsObject,
+            electoralVotes: electors,
             tipoffContests: tipoffs,
         };
 

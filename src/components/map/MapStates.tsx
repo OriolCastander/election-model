@@ -56,7 +56,6 @@ export const getMapStatesData = (colors: {[stateName in PresidentialContestName]
         polygons.push(...statePolygonsData.polygons);
     }
 
-    console.log("getting states map data", minX, maxX, minY, maxY);
 
     return {polygons, minX, maxX, minY, maxY, needsPreparing: true};
 
