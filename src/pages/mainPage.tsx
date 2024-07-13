@@ -18,6 +18,7 @@ function MainPage(){
     const simulations = PRESIDENTIAL_RACE.simulate(PresidentialRace.defaultSimulationConfig, prezData);
 
     const electoralCollegeSimData = Object.keys(simulations.electoralVotes).map(key=>{return {x:parseInt(key), y:simulations.electoralVotes[parseInt(key)]}});
+    const electoralCollegeSimColors: {start: number, end: number, color:string}[] = [{start: 0, end:269, color: "#0000ff"}, {start:269,end:538,color:"#ff0000"}];
 
     return (
         <div>
@@ -80,14 +81,15 @@ function MainPage(){
 
             {/** Simulation */}
             <div>
-                
-                <AreaChart data={getRollingAverage(electoralCollegeSimData, 10)} color={"#ff0000"}/>
+                <h4>OUR SIMULATION</h4>
+                <p>This is our simulation for the electoral college bla bla bla</p>
+                <AreaChart data={getRollingAverage(electoralCollegeSimData, 10)} color={electoralCollegeSimColors}/>
             </div>
 
 
             <div style={{height: "50px"}}></div>
 
-            {/**  */}
+            {/** Battlegorund states */}
         </div>
     )
 }
