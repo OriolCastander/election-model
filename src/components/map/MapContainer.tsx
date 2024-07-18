@@ -1,43 +1,66 @@
 import React from 'react';
-import { MapElector, getMapElectorsData, MapElectorsData, MapElectorData } from './MapElector';
-import { PresidentialContestName, PresidentialRaceOutput } from '../../electionModel/contests/presidentialRace';
-import { LITERAL_COLORS, mapObject } from '../../utils/utils';
-import { Distribution } from '../../electionModel/distributions/distribution';
-import { getDistributionColor } from '../../electionModel/utils/utils';
-import { MapStatesData, getMapStatesData, MapStatePolygon } from './MapStates';
+import { MapElector, MapElectorsData } from './MapElector';
+import { PresidentialContestName } from '../../electionModel/contests/presidentialRace';
+import { MapStatesData, MapStatePolygon } from './MapStates';
 
 /** Percentage of padding in the map */
 const MAP_PADDING = .08;
 
-function MapContainer({prezData}: {prezData: PresidentialRaceOutput}){
+type MapMode = "States" | "Electors";
+
+export interface MapConfig{
+
+    /** List of possible modes the map can be in */
+    mapModes?: MapMode[],
+
+    contestSwitch?: boolean,
+}
+
+/**
+ * Modifies the map config and fills it with the default values
+ */
+const fillMapConfig = (config: MapConfig): void=>{
+
+    config.mapModes ??= ["States"];
+    config.contestSwitch ??= false;
+}
+
+function MapContainer({predata, config}: {predata: {electors?: MapElectorsData, states?: MapStatesData}, config: MapConfig}){
+
+    fillMapConfig(config);
 
     const mapContainerRef = React.useRef<HTMLDivElement>(null);
-    const mapCanvasRef = React.useRef<HTMLCanvasElement>(null);
 
     const [highlightedState, setHighlightedState] = React.useState<PresidentialContestName | null>(null);
 
-    const [mapMode, setMapMode] = React.useState<"States" | "Electors">("States");
+    const [mapMode, setMapMode] = React.useState<MapMode>("States");
     
-    const mapColors = mapObject<PresidentialContestName, Distribution, string>(prezData.contestsWhole, (distribution)=>LITERAL_COLORS[getDistributionColor(distribution)]);
-    const [mapElectors, setMapElectors] = React.useState<MapElectorsData>(getMapElectorsData(mapColors)) as [MapElectorsData, (callback: (value: MapElectorsData) => MapElectorsData) => void];
+    const [mapElectors, setMapElectors] = React.useState<MapElectorsData | null>(predata.electors ?? null) as [MapElectorsData, (callback: (value: MapElectorsData) => MapElectorsData) => void];
+    const [mapStates, setMapStates] = React.useState<MapStatesData | null>(predata.states ?? null) as [MapStatesData, (callback: (value: MapStatesData) => MapStatesData) => void];
 
-    const [mapStates, setMapStates] = React.useState<MapStatesData>(getMapStatesData(mapColors)) as [MapStatesData, (callback: (value: MapStatesData) => MapStatesData) => void];
-
-    ///PREPARE 
     React.useEffect(()=>{
         if (mapContainerRef.current != null){
 
             const mapData = mapMode == "States" ? mapStates : mapElectors;
 
             const width = mapContainerRef.current.offsetWidth;
-
-            ///FIND THE RATIO
             const mapWidth = width * (1 - 2 * MAP_PADDING);
             const electorSize = mapWidth / (mapData.maxX - mapData.minX);
-            const mapHeight = electorSize * (mapData.maxY - mapData.minY);
-            const height = mapHeight / (1 - 2 * MAP_PADDING);
+            var mapHeight: number;
 
+            ///FIND THE RATIO
+            if (mapMode == "Electors"){
+                
+                mapHeight = electorSize * (mapData.maxY - mapData.minY);
+            }else if (mapMode == "States"){
+                mapHeight = mapWidth * (mapData.maxY - mapData.minY) / (mapData.maxX - mapData.minX)
+            }else{
+                throw new Error("Undefined map mode " + mapMode);
+            }
+            
+            const height = mapHeight / (1 - 2 * MAP_PADDING);
             mapContainerRef.current.style.height = height + "px";
+
 
             if (mapMode === "Electors" && mapElectors.needsPreparing){
                 //UPDATE THE MAP ELECTORS STUFF
@@ -81,7 +104,7 @@ function MapContainer({prezData}: {prezData: PresidentialRaceOutput}){
             }
         }
 
-    }, [mapMode, mapStates]);
+    }, [mapMode, mapStates]); //we may be able to not have mapStates here
 
 
     const getElectorsMap = ()=>{
@@ -117,16 +140,21 @@ function MapContainer({prezData}: {prezData: PresidentialRaceOutput}){
         <div className="map-wrapper">
             <div style={{display: "flex", justifyContent:"space-between", width:"100%"}}>
 
-                <div style={{display: "flex"}}> {/** PRES / HOUSE / SENATE BUTTONS */}
+                {config.contestSwitch ? <div style={{display: "flex"}}> {/** PRES / HOUSE / SENATE BUTTONS */}
                     <button>PRESIDENT</button>
                     <button>HOUSE</button>
                     <button>SENATE</button>
-                </div>
+                </div> : <></>}
 
                 <div style={{display: "flex"}}> {/** REAL OR ELECTORAL MAP */}
 
-                    <button onClick={()=>{setMapMode("States")}}>GEOGRAPHIC</button>
-                    <button onClick={()=>{setMapMode("Electors")}}>WEIGHTED</button>
+                    {config.mapModes!.length > 1 && config.mapModes!.includes("States") ? 
+                        <button onClick={()=>{setMapMode("States")}}>GEOGRAPHIC</button> :
+                        <></>}
+
+                    {config.mapModes!.length > 1 && config.mapModes!.includes("Electors") ? 
+                        <button onClick={()=>{setMapMode("Electors")}}>ELECTORS</button> :
+                        <></>}
 
                 </div>
             </div>

@@ -3,22 +3,41 @@ import Bar from "../components/Bar";
 import MapContainer from "../components/map/MapContainer";
 
 import { PRESIDENTIAL_RACE } from "../electionModel";
-import { PresidentialRace } from "../electionModel/contests/presidentialRace";
-import { getElectoralCollegeCounts, getRawVoteData } from "../electionModel/utils/utils";
+import { PresidentialContestName, PresidentialRace } from "../electionModel/contests/presidentialRace";
+import { getBattleGroundContests, getDistributionColor, getElectoralCollegeCounts, getRawVoteData } from "../electionModel/utils/utils";
 import AreaChart from "../components/AreaChart";
-import { getRollingAverage } from "../utils/utils";
+import { LITERAL_COLORS, getRollingAverage, mapObject } from "../utils/utils";
+import RaceLister, { RaceRowData } from "../components/RaceLister";
+import { getMapElectorsData } from "../components/map/MapElector";
+import { Distribution } from "../electionModel/distributions/distribution";
+import { getMapStatesData } from "../components/map/MapStates";
 
 function MainPage(){
 
     const prezData = PRESIDENTIAL_RACE.compute();
 
+    //ELECTORAL COLLEGE SUTFF
     const electoralCollegeData = getElectoralCollegeCounts(prezData.contestsWhole);
     const popularVoteData = getRawVoteData(PRESIDENTIAL_RACE.genericBallot.computeSeparate()!);
 
+    const electoralMapColors = mapObject<PresidentialContestName, Distribution, string>(prezData.contestsWhole, (distribution)=>LITERAL_COLORS[getDistributionColor(distribution)]);
+    
+
+    //SIMULATION STUFF
     const simulations = PRESIDENTIAL_RACE.simulate(PresidentialRace.defaultSimulationConfig, prezData);
 
     const electoralCollegeSimData = Object.keys(simulations.electoralVotes).map(key=>{return {x:parseInt(key), y:simulations.electoralVotes[parseInt(key)]}});
-    const electoralCollegeSimColors: {start: number, end: number, color:string}[] = [{start: 0, end:269, color: "#0000ff"}, {start:269,end:538,color:"#ff0000"}];
+    const electoralCollegeSimColors: {start: number, end: number, color:string}[] = [{start: 0, end:269, color: "#ff0000"}, {start:269,end:538,color:"#0000ff"}];
+
+    const battleGroundContestsNames = getBattleGroundContests(simulations.contests, mapObject(PRESIDENTIAL_RACE.contests, (c)=>c.electoralVotes), 10);
+    
+    const battlegroundContestsChartData: RaceRowData[] = battleGroundContestsNames.map((cn)=>{
+        return {
+            name: cn,
+            distribution: simulations.contests[cn],
+            chartData: simulations.contests[cn].getPdfAsObjectList(),
+        };
+    });
 
     return (
         <div>
@@ -75,7 +94,10 @@ function MainPage(){
             <div style={{height: "50px"}}></div>
 
             {/** MAPS */}
-            <MapContainer prezData={prezData} />
+            <MapContainer
+                predata={{electors: getMapElectorsData(electoralMapColors), states: getMapStatesData(electoralMapColors)}}
+                config={{mapModes: ["States", "Electors"]}} 
+            />
 
             <div style={{height: "50px"}}></div>
 
@@ -83,13 +105,19 @@ function MainPage(){
             <div>
                 <h4>OUR SIMULATION</h4>
                 <p>This is our simulation for the electoral college bla bla bla</p>
-                <AreaChart data={getRollingAverage(electoralCollegeSimData, 10)} color={electoralCollegeSimColors}/>
+                <AreaChart data={getRollingAverage(electoralCollegeSimData, 10)} color={electoralCollegeSimColors} config={{isReversed: true}}/>
             </div>
 
 
             <div style={{height: "50px"}}></div>
 
             {/** Battlegorund states */}
+            <div>
+                <h4>BATTLEGROUND STATES</h4>
+                <RaceLister data={battlegroundContestsChartData}  config={{cutoff: .2}}/>
+
+
+            </div>
         </div>
     )
 }

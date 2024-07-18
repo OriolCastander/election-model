@@ -125,4 +125,30 @@ export class DiscreteDistribution extends Distribution{
             else{return val - this.cdf[index - 1];}
         });
     }
+
+    getPdfAsObjectList(): {x: number, y:number}[]{
+        const arr = [];
+        var currentX = this.scaler.start;
+        var prevValue = 0;
+        for (const value of this.cdf){
+            arr.push({x: currentX, y: value - prevValue});
+            currentX += this.scaler.dx;
+            prevValue = value;
+        }
+        return arr;
+    }
+
+    /**
+     * Returns the cdf as an object
+     */
+    getCdfAsObjectList(): {x: number, y: number}[]{
+        const arr = [];
+        var currentX = this.scaler.start;
+        for (const value of this.cdf){
+            arr.push({x: currentX, y:value});
+            currentX += this.scaler.dx;
+        }
+
+        return arr;
+    }
 }

@@ -1,6 +1,9 @@
 import { ContestColor } from "../electionModel/utils/utils";
 
 
+/**
+ * Extends array.map to an object
+ */
 export const mapObject = <K extends string, T,V>(object: {[k in K]: T}, func: (t: T)=>V): {[k in K]: V}=>{
 
     const initialValue: {[k in string]: V} = {};

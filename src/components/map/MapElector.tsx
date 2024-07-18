@@ -41,15 +41,15 @@ export type MapElectorsData = {
  * along with metadata to prepare the final elector list
  * 
  */
-export const getMapElectorsData = (colors: {[stateName in PresidentialContestName]: string}): MapElectorsData=>{
+export const getMapElectorsData = (colors: {[stateName in PresidentialContestName]?: string}): MapElectorsData=>{
 
     const electorsData: MapElectorData[] = [];
     var minX = Infinity; var maxX = -Infinity; var minY = Infinity; var maxY = -Infinity;
 
-    for (const stateName in dataJSON){
+    for (const stateName in colors){
         const stateData = dataJSON[stateName as PresidentialContestName];
 
-        const stateColor = colors[stateName as PresidentialContestName];
+        const stateColor = colors[stateName as PresidentialContestName]!;
 
         for (const electorCoords of stateData.electors){
 

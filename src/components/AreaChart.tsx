@@ -3,8 +3,16 @@ import React from 'react';
 
 
 
+interface AreaChartConfig {
+    xMin?: number,
+    yMin?: number,
+    xMax?: number,
+    yMax?: number,
 
-function AreaChart({data, color}: {data: {x: number, y: number}[], color: string | {start: number, end: number, color: string}[]}){
+    isReversed?: boolean,
+}
+
+function AreaChart({data, color, config}: {data: {x: number, y: number}[], color: string | {start: number, end: number, color: string}[], config: AreaChartConfig}){
 
     var colors: {start: number, end: number, color: string}[];
 
@@ -18,10 +26,10 @@ function AreaChart({data, color}: {data: {x: number, y: number}[], color: string
 
     const [scaledData, setScaledData] = React.useState<{points: {x: number, y: number}[], color:string}[]>([]);
 
-    const xMin = data[0].x;
-    const xMax = data.at(-1)!.x;
-    const yMin = Math.min(...data.map(el=>el.y));
-    const yMax = Math.max(...data.map(el=>el.y));
+    const xMin = config.xMin ?? data[0].x;
+    const xMax = config.xMax ?? data.at(-1)!.x;
+    const yMin = config.yMin ?? Math.min(...data.map(el=>el.y));
+    const yMax = config.yMax ?? Math.max(...data.map(el=>el.y));
 
     React.useEffect(()=>{
         if (svgRef.current != null){
@@ -96,7 +104,17 @@ function AreaChart({data, color}: {data: {x: number, y: number}[], color: string
 
                 polygonData.points.push({x: colorSegment.end, y: yMin});
 
-                newScaledData.push({...polygonData, points: polygonData.points.map((p)=>{return {x: (p.x - xMin)/(xMax - xMin)*width, y: (1-(p.y-yMin)/(yMax-yMin))*height}})});
+                newScaledData.push({...polygonData, points: polygonData.points.map((p)=>{
+                    var xVal: number;
+                    if (config.isReversed){
+                        xVal = (1-(p.x - xMin)/(xMax - xMin))*width;
+                    }else{
+                        xVal = (p.x - xMin)/(xMax - xMin)*width;
+                    }
+
+                    const yVal = (1-(p.y-yMin)/(yMax-yMin))*height;
+                    return {x: xVal, y: yVal};
+                })});
                 
             }
 

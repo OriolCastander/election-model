@@ -77,3 +77,42 @@ export const getRawVoteData = (distribution: SeparateDistribution): {SafeDem: nu
     };
 
 }
+
+
+/**
+ * Returns a list of the states most likely of being the tipping point (i.e. closes to the mean of the country, weighted by electoral weight)
+ * sorted from most republican to most democrat
+ */
+export const getBattleGroundContests = (distributions: {[name in PresidentialContestName]: Distribution}, nElectors: {[name in PresidentialContestName]: number}, nContests: number): PresidentialContestName[]=>{
+
+    const contests: {name: PresidentialContestName, mean: number, electors:number, meanElector:number}[] = Object.keys(distributions).map((contestsNameString)=>{
+        const contestName = contestsNameString as PresidentialContestName;
+        return {
+            name: contestName,
+            mean: distributions[contestName].mean,
+            electors: nElectors[contestName],
+            meanElector: 0.0,
+        }
+    });
+
+
+    contests.sort((a,b)=>a.mean - b.mean);
+
+    var cumElectors = 0;
+    
+    for (let i=0; i<contests.length; i++){
+        contests[i].meanElector += cumElectors + contests[i].electors;
+        cumElectors += contests[i].electors;
+    }
+
+    ///NOT THE MOST EFFICIENT TO GET THE MOST "BATTLEGROUNDISH" ONES, AS WE HAVE THEM ALREADY "SORTA" SORTED AND WE COULD GET THE MOST BATTLEGROUND STATE
+    ///(WHOSE ELECTORS "INTERSECT" 269) AND EXPAND TO ABOVE AND BELOW FROM THERE
+    ///I DONT GIVE A FUCK THO, IM USING REACT
+    contests.sort((a,b)=>Math.abs(a.meanElector - 269) - Math.abs(b.meanElector - 269));
+    
+    const selectedContests = contests.slice(0, nContests);
+    selectedContests.sort((a,b)=>a.mean - b.mean);
+
+    return selectedContests.map(c=>c.name);
+
+}

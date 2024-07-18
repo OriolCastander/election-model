@@ -38,14 +38,14 @@ export type MapStatesData = {
  * along with metadata to prepare the final list
  */
 
-export const getMapStatesData = (colors: {[stateName in PresidentialContestName]: string}): MapStatesData=>{
+export const getMapStatesData = (colors: {[stateName in PresidentialContestName]?: string}): MapStatesData=>{
 
 
     const polygons: MapPolygonData[] = [];
 
     var minX = Infinity; var maxX = -Infinity; var minY = Infinity; var maxY = -Infinity;
-    for (const stateName in dataJSON){
-        const stateColor = colors[stateName as PresidentialContestName];
+    for (const stateName in colors){
+        const stateColor = colors[stateName as PresidentialContestName]!;
 
         const statePolygonsData = getMapStateData(stateName as PresidentialContestName, stateColor);
         if (statePolygonsData.maxX > maxX){maxX = statePolygonsData.maxX;}
@@ -65,7 +65,7 @@ export const getMapStatesData = (colors: {[stateName in PresidentialContestName]
  * Returns a list of semi-prepared data for polygons (positions will need to be adjusted (putting them between min and max, corrent width and height))
  * along with metadata to prepare the final list for one state
  */
-export const getMapStateData = (stateName: PresidentialContestName, color: string): MapStatesData=>{
+const getMapStateData = (stateName: PresidentialContestName, color: string): MapStatesData=>{
 
     const polygons: MapPolygonData[] = [];
 

@@ -262,7 +262,7 @@ export class PresidentialRace{
                 }
             }
 
-            electors[538 - nElectors] += 1 / config.nIterations;
+            electors[nElectors] += 1 / config.nIterations;
 
             //ASSIGN A VICTOR (+ TIPOFF STATES)
             if (nElectors > 269){
