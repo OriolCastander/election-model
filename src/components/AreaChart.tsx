@@ -46,7 +46,7 @@ function AreaChart({data, color, config}: {data: {x: number, y: number}[], color
 
                 var foundValue = false;
                 for (var i=currentDataIndex; i<data.length-1; i++){
-                    if (Math.abs(colorSegment.start - data[i].x) < .000001){
+                    if (Math.abs(colorSegment.start - data[i].x) < .0000001){
                         polygonData.points.push({x: colorSegment.start, y:data[i].y});
                         currentDataIndex = i;
                         foundValue = true;

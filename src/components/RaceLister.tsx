@@ -1,5 +1,6 @@
 import { PresidentialContestName } from "../electionModel/contests/presidentialRace";
-import { Distribution } from "../electionModel/distributions/distribution";
+import { DiscreteDistribution } from "../electionModel/distributions/discreteDistribution";
+import { getRollingAverage } from "../utils/utils";
 import AreaChart from "./AreaChart";
 import MapContainer from "./map/MapContainer";
 import { getMapStatesData } from "./map/MapStates";
@@ -10,7 +11,7 @@ export interface RaceListerConfig{
     cutoff: number;
 }
 
-export type RaceRowData = {name: PresidentialContestName, chartData: {x: number, y:number}[], distribution: Distribution};
+export type RaceRowData = {name: PresidentialContestName, distribution: DiscreteDistribution};
 
 function RaceLister({data, config}: {data: RaceRowData[], config: RaceListerConfig}){
 
@@ -56,8 +57,16 @@ function RaceRow({data, config}: {data: RaceRowData, config: RaceListerConfig}){
     }
 
     //FILTER CHART DATA WITH THE CONFIG
-    const chartData = data.chartData.filter((value)=>Math.abs(value.x)<config.cutoff);
+    var chartData = data.distribution.getPdfAsObjectList().filter((value)=>Math.abs(value.x)<config.cutoff);
+    chartData.push({x: config.cutoff, y: 0.0});
+    chartData.unshift({x: -config.cutoff, y: 0.0});
+    
+    console.log("chart data before", chartData);
+    chartData = getRollingAverage(chartData, .05, .01);
+    console.log("chart data after", chartData);
+
     const chartColors = getChartColors(chartData);
+    console.log(chartColors);
 
     //USE EFFECT TO CENTER THE IMAGE MAP TO THE APPROPIATE PLACE
     React.useEffect(()=>{

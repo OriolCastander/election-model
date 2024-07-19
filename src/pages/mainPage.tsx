@@ -31,13 +31,7 @@ function MainPage(){
 
     const battleGroundContestsNames = getBattleGroundContests(simulations.contests, mapObject(PRESIDENTIAL_RACE.contests, (c)=>c.electoralVotes), 10);
     
-    const battlegroundContestsChartData: RaceRowData[] = battleGroundContestsNames.map((cn)=>{
-        return {
-            name: cn,
-            distribution: simulations.contests[cn],
-            chartData: simulations.contests[cn].getPdfAsObjectList(),
-        };
-    });
+    const battlegroundContestsChartData: RaceRowData[] = battleGroundContestsNames.map((cn)=>{ return {name: cn, distribution: simulations.contests[cn]};});
 
     return (
         <div>
@@ -114,7 +108,7 @@ function MainPage(){
             {/** Battlegorund states */}
             <div>
                 <h4>BATTLEGROUND STATES</h4>
-                <RaceLister data={battlegroundContestsChartData}  config={{cutoff: .2}}/>
+                <RaceLister data={battlegroundContestsChartData}  config={{cutoff: .15}}/>
 
 
             </div>
