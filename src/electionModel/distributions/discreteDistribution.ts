@@ -1,4 +1,5 @@
 import { Distribution } from "./distribution";
+import { NormalDistribution } from "./normalDistribution";
 
 
 /**
@@ -68,6 +69,93 @@ export class DiscreteDistribution extends Distribution{
         return new DiscreteDistribution(cdf, array[0], array.at(-1)!);
     }
 
+
+    /**
+     * Transforms a normal distribution into a discrete one
+     */
+    static fromNormal(normalDist: NormalDistribution): DiscreteDistribution{
+
+        const N_POINTS = 50; //PROBABLY SHOULD BE SET UP IN A CONFIG OR SOMETHING
+        const N_STDS_TAIL = 3; // number of stds to include in the array
+
+        const start = normalDist.mean - N_STDS_TAIL * normalDist.std;
+        const end = normalDist.mean + N_STDS_TAIL * normalDist.std;
+
+        const dx = (end - start) / N_POINTS;
+
+        const cdf = [];
+        for (let i=0; i<N_POINTS; i++){
+            cdf.push(normalDist.getProbability(start + i * dx));
+        }
+
+        return new DiscreteDistribution(cdf, start, end);
+    }
+
+    /**
+     * Combines a bunch of discrete dists into one
+     * @param dists 
+     * @param weights 
+     * @param shouldFlathead the valley between 2 peaks is interpolated. Only works if there are 2 dists,
+     * and their means are their peaks as well
+     */
+    static combineDiscretes(dists: DiscreteDistribution[], weights: number[] | null = null, shouldFlathead: boolean = false): DiscreteDistribution{
+
+        if (weights == null){ //"EQUAL" weights if no weights are provided
+            weights = new Array(dists.length).fill(1/dists.length);
+        }
+
+        if (dists.length != weights.length){
+            throw new Error("Number of distributions and number of weights should be equal when combining them");
+        }
+
+        if (shouldFlathead == true && dists.length > 2){
+            throw new Error("Can only flathead if there are 2 dists");
+        }
+
+        const newStart = Math.min(...dists.map(d=>d.scaler.start));
+        const newEnd = Math.max(...dists.map(d=>d.scaler.end));
+        const newDx = Math.min(...dists.map(d=>d.scaler.dx));
+
+        const cdf = [];
+        var currentPos = newStart;
+
+        while (currentPos < newEnd + newDx){
+
+            var currentValue = 0.0;
+            for (let i=0; i<dists.length; i++){
+                var distValue;
+                const floatingIndex = (currentPos - dists[i].scaler.start) / dists[i].scaler.dx;
+                const distIndex = Math.floor(floatingIndex);
+                if (distIndex < 0){distValue = 0.0;}
+                else if (distIndex >= dists[i].nPoints){distValue = 1.0;}
+                else{
+                    const distanceToPrevious = floatingIndex % 1;
+                    const distanceToNext = 1 - distanceToPrevious;
+                    distValue = dists[i].cdf[distIndex] * distanceToPrevious + dists[i].cdf[distIndex + 1] * distanceToNext;
+                }
+
+                currentValue += distValue * weights[i];
+            }
+
+            currentPos += newDx;
+            cdf.push(currentValue);
+        }
+
+        if (shouldFlathead){
+            const peaks = dists.map(d=>d.mean);
+            peaks.sort((a,b)=>a-b)
+            const indices = peaks.map((p)=>(p-newStart)/newDx);
+            const startIndex = Math.ceil(indices[0]);
+            const endIndex = Math.floor(indices[1]);
+
+            for (let i=startIndex; i<=endIndex; i++){
+                const percent = (newStart + newDx * i - indices[0]) / (indices[1] - indices[0]);
+                cdf[i] = peaks[0] * percent + peaks[1] * (1 - percent);
+            }
+        }
+
+        return new DiscreteDistribution(cdf, newStart, currentPos);
+    }
 
     /**
      * Returns the probability that the value is below a certain cutoff

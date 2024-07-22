@@ -1,5 +1,5 @@
 
-export const pollsterNames = ["FOX News", "Economist/YouGov","NY Times/Siena", "Reuters/Ipsos"] as const;
+export const pollsterNames = ["FOX News", "Economist/YouGov","NY Times/Siena", "Reuters/Ipsos", "Emerson", "Insider Advantage"] as const;
 
 export type PollsterName = typeof pollsterNames[number];
 

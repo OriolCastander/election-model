@@ -153,12 +153,14 @@ export class PresidentialRace{
 
         for (const contestName in this.contests){
             this.contests[contestName as PresidentialContestName].polls.push(...polls.filter((poll)=>poll.contest === contestName));
+            if (this.contests[contestName as PresidentialContestName].polls.length > 0){
+                console.log(contestName, this.contests[contestName as PresidentialContestName].compute()?.mean);
+            }
         }
-
     }
 
     static defaultComputationConfig: PresidentialRaceConfig = {
-        contestElasticity: .3,
+        contestElasticity: .4,
         genericBallotContestConfig: Contest.defaultContestComputeConfig,
         constestConfig: Contest.defaultContestComputeConfig,
         noPollingUncertainty: .015,
@@ -171,7 +173,7 @@ export class PresidentialRace{
 
         const genericBallotDist = this.genericBallot.compute()! as NormalDistribution;
 
-        const contests: {[kind in PresidentialContestName]?: Distribution} = {};
+        const contestsWhole: {[kind in PresidentialContestName]?: Distribution} = {};
         const contestsOwn: {[kind in PresidentialContestName]?: Distribution | null} = {};
         
         for (const contestName in this.contests){
@@ -189,13 +191,20 @@ export class PresidentialRace{
             }
 
             const combinedDist = genericBallotEnvironment.getShifted(contestOwnDist as NormalDistribution, [1 - config.contestElasticity, config.contestElasticity]);
+            
+            if (false){ //IN THE FUTURE, IF COMBINE DISTS WITH FLATHEAD
+                //const genericBallotEnvironmentDiscrete = DiscreteDistribution.fromNormal(genericBallotEnvironment);
+                //const contestOwnDistDiscrete = DiscreteDistribution.fromNormal(contestOwnDist as NormalDistribution);
 
-            contests[contestName as PresidentialContestName] = combinedDist;
+                //combinedDist = DiscreteDistribution.combineDiscretes([genericBallotEnvironmentDiscrete, contestOwnDistDiscrete], [1 - config.contestElasticity, config.contestElasticity]);
+            }
+
+            contestsWhole[contestName as PresidentialContestName] = combinedDist;
         }
 
         return {
             genericBallot: genericBallotDist,
-            contestsWhole: contests as {[kind in PresidentialContestName]: Distribution},
+            contestsWhole: contestsWhole as {[kind in PresidentialContestName]: Distribution},
             contestsOwn: contestsOwn as {[kind in PresidentialContestName]: Distribution | null},
         }
     }
@@ -213,6 +222,8 @@ export class PresidentialRace{
         if (computation == null){
             computation = this.compute(computationConfig);
         }
+
+
         const genericBallotDist = computation.genericBallot as NormalDistribution;
 
 
@@ -299,7 +310,6 @@ export class PresidentialRace{
 
             else{results.tie += 1/config.nIterations;}
         }
-
 
         const contestDists: {[s in PresidentialContestName]?: DiscreteDistribution} = {};
         for (const contestName in contestResults){

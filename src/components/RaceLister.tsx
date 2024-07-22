@@ -60,13 +60,10 @@ function RaceRow({data, config}: {data: RaceRowData, config: RaceListerConfig}){
     var chartData = data.distribution.getPdfAsObjectList().filter((value)=>Math.abs(value.x)<config.cutoff);
     chartData.push({x: config.cutoff, y: 0.0});
     chartData.unshift({x: -config.cutoff, y: 0.0});
-    
-    console.log("chart data before", chartData);
-    chartData = getRollingAverage(chartData, .05, .01);
-    console.log("chart data after", chartData);
+
+    chartData = getRollingAverage(chartData, .004, .002);
 
     const chartColors = getChartColors(chartData);
-    console.log(chartColors);
 
     //USE EFFECT TO CENTER THE IMAGE MAP TO THE APPROPIATE PLACE
     React.useEffect(()=>{
