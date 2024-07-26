@@ -57,3 +57,21 @@ export const fetchPolls = (pollsters: {[name in PollsterName]?: Pollster}): Poll
 
     return polls;
 }
+
+/**
+ * Configs about the getPollingQuality
+ */
+export interface PollingQualityConfig{
+    /** Baseline number of polls required for the contest */
+    baselineNPolls: number,
+}
+
+/**
+ * Returns the polling quality from a bunch of polls. 0, polling quality is non existant, 1, super good 
+ * quality
+ */
+export const getPollingQuality = (polls: Poll[], config: PollingQualityConfig): number =>{
+
+    //TODO: IMPROVE THIS
+    return Math.max(polls.length / config.baselineNPolls, 1.0);
+}

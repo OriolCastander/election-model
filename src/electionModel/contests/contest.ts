@@ -2,7 +2,7 @@
 import {Distribution} from "../distributions/distribution";
 import {NormalDistribution} from "../distributions/normalDistribution";
 import { SeparateDistribution } from "../distributions/separateDistribution";
-import { Poll } from "../polling/poll";
+import { Poll, PollingQualityConfig, getPollingQuality } from "../polling/poll";
 
 
 /**
@@ -14,6 +14,11 @@ export type ContestComputeConfig = {
      * Max days old that a poll can be
      */
     pollWindow: number,
+
+    pollingQualityConfig: PollingQualityConfig,
+
+    /** The amount of deviation to add when computing based of polling quality */
+    pollingQualityFactor: number,
 
 }
 
@@ -36,7 +41,9 @@ export class Contest{
 
 
     static defaultContestComputeConfig: ContestComputeConfig = {
-        pollWindow: 21,
+        pollWindow: 16,
+        pollingQualityConfig: {baselineNPolls: 6},
+        pollingQualityFactor: .03,
     }
 
     /**
@@ -49,7 +56,12 @@ export class Contest{
 
         const diffs = validPolls.map((poll)=>poll.generalResult.dem - poll.generalResult.rep);
 
-        return NormalDistribution.fromArray(diffs);
+        const normal = NormalDistribution.fromArray(diffs);
+        const pollingQuality = getPollingQuality(validPolls, config.pollingQualityConfig);
+        console.log("gotten polling quality " + pollingQuality);
+        normal.addStd((1-pollingQuality) * config.pollingQualityFactor);
+
+        return normal;
     }
 
     computeSeparate(config: ContestComputeConfig = Contest.defaultContestComputeConfig): SeparateDistribution | null{

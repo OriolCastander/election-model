@@ -32,11 +32,6 @@ export interface PresidentialRaceConfig{
 
     /** Compute config for contests */
     constestConfig: ContestComputeConfig,
-
-    /**
-     * Standard deviation added if we do not have a polls distribution
-     */
-    noPollingUncertainty: number,
 };
 
 /**
@@ -153,9 +148,6 @@ export class PresidentialRace{
 
         for (const contestName in this.contests){
             this.contests[contestName as PresidentialContestName].polls.push(...polls.filter((poll)=>poll.contest === contestName));
-            if (this.contests[contestName as PresidentialContestName].polls.length > 0){
-                console.log(contestName, this.contests[contestName as PresidentialContestName].compute()?.mean);
-            }
         }
     }
 
@@ -163,7 +155,6 @@ export class PresidentialRace{
         contestElasticity: .4,
         genericBallotContestConfig: Contest.defaultContestComputeConfig,
         constestConfig: Contest.defaultContestComputeConfig,
-        noPollingUncertainty: .015,
     }
 
     /**
@@ -187,7 +178,7 @@ export class PresidentialRace{
             contestsOwn[contestName as PresidentialContestName] = contestOwnDist;
 
             if (contestOwnDist == null){
-                contestOwnDist = new NormalDistribution(0, config.noPollingUncertainty);
+                contestOwnDist = new NormalDistribution(0, config.constestConfig.pollingQualityFactor);
             }
 
             const combinedDist = genericBallotEnvironment.getShifted(contestOwnDist as NormalDistribution, [1 - config.contestElasticity, config.contestElasticity]);
@@ -256,7 +247,7 @@ export class PresidentialRace{
                 var contestOwnResult: number;
 
                 if (computation.contestsOwn[contestName as PresidentialContestName] == null){
-                    contestOwnResult = contestResultFromGeneric + (new NormalDistribution(0,computationConfig.noPollingUncertainty)).getRandom();
+                    contestOwnResult = contestResultFromGeneric + (new NormalDistribution(0,computationConfig.constestConfig.pollingQualityFactor)).getRandom();
                 }else{
                     contestOwnResult = computation.contestsOwn[contestName as PresidentialContestName]!.getRandom();
                 }

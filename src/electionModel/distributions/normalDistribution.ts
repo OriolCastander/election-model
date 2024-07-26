@@ -73,6 +73,13 @@ export class NormalDistribution extends Distribution{
     }
 
     /**
+     * Adds (by quares method) a standard deviation to the normal
+     */
+    addStd(std: number): void{
+
+    }
+
+    /**
      * Returns a normal distribution that is this shifted by the other. If weighted, 0th element is the weight for this,
      * 1st is weight for the other
      */
